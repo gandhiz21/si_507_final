@@ -12,7 +12,7 @@ API_HOST = 'https://api.yelp.com'
 SEARCH_PATH = '/v3/businesses/search'
 BUSINESS_PATH = '/v3/businesses/'  # Business ID will come after slash.
 
-# Yelp API request functions
+# Yelp API request functions # From Yelp Fusion Github
 def request(host, path, api_key, url_params=None):
     url_params = url_params or {}
     url = '{0}{1}'.format(host, quote(path.encode('utf8')))
@@ -73,13 +73,14 @@ YELP_CACHE = open_cache()
 
 # Graph inputs
 import networkx as nx
-
+import datetime
 #, "Nature", "Shopping", "Park", "Museum", "Nightlife"
 # terms to search API
 searchterms = ["Exercise", "Nightlife", "Park",
 "Nature", "Shopping", "Museum", "Snacks",
 "Dessert", "Bar", "Art", "Music", "Sports",
-"Clothes", "Beauty", "Animals"]
+"Clothes", "Beauty", "Animals", "Kids", "Free",
+"Cafe", "Tech", "Theater", "Volunteer", "Books"]
 searchname_dict = {} # dict of API results
 # dictionaries of attributes that I want to be accessible within the graph
 yelp_id = {} # id for further testing
@@ -92,8 +93,9 @@ display_phone = {} # phone number
 G = nx.Graph() # Initialize a Graph object
 nodes = [] # set to empty list
 
-
+# Making the Graph
 if os.path.exists(CACHE_FILENAME) == False: # if no cache
+    t1 = datetime.datetime.now().timestamp()
     for searchterm in searchterms: # adding all the API results to the searchname_list
         searchname = search(API_Key, searchterm, "Ann Arbor, MI")
         options = searchname["businesses"]
@@ -119,7 +121,9 @@ if os.path.exists(CACHE_FILENAME) == False: # if no cache
             rating[entry["name"]] = entry["rating"]
             display_address[entry["name"]] = entry["location"]["display_address"][0]
             display_phone[entry["name"]] = entry["display_phone"]
+    t2 = datetime.datetime.now().timestamp()
 else: # if cache exists
+    t3 = datetime.datetime.now().timestamp()
     for searchterm in searchterms:
         searchname_dict[searchterm] = YELP_CACHE[searchterm] # building searchname_dict using the cache YELP_CACHE
 
@@ -141,24 +145,28 @@ else: # if cache exists
             rating[entry["name"]] = entry["rating"]
             display_address[entry["name"]] = entry["location"]["display_address"][0]
             display_phone[entry["name"]] = entry["display_phone"]
-
+    t4 = datetime.datetime.now().timestamp()
 
 # Saving the cache daily
 from datetime import date
 from pathlib import Path
 path = Path(CACHE_FILENAME)
-timestamp = date.fromtimestamp(path.stat().st_mtime) # records today's date
+if os.path.exists(CACHE_FILENAME) == True:
+    timestamp = date.fromtimestamp(path.stat().st_mtime) # records today's date
 
 if os.path.exists(CACHE_FILENAME) == True and date.today() == timestamp: # if cache exists and it was made today
     print("Cache was used.") # use cache
+    print("Time to build graph with cache:", (t4 - t3) * 1000, "ms")
 elif os.path.exists(CACHE_FILENAME) == True and date.today() != timestamp: # if cache exists but it was not made today
     os.remove(path) # remove old cache
     print("Building a new cache...")
+    print("Time to build graph with cache:", (t4 - t3) * 1000, "ms")
     for searchterm in searchterms:
         YELP_CACHE[searchterm] = searchname_dict[searchterm]
         save_cache(YELP_CACHE)
 else: # if there's no cache at all
     print("Building cache...")
+    print("Time to build graph without cache:", (t2 - t1) * 1000, "ms")
     for searchterm in searchterms:
         YELP_CACHE[searchterm] = searchname_dict[searchterm]
         save_cache(YELP_CACHE)
