@@ -28,6 +28,8 @@ import requests
 
 import json
 
+from urllib.parse import quote
+
 import os
 
 import networkx as nx
