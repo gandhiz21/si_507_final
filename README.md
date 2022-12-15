@@ -3,7 +3,7 @@ Final project repository for SI 507, Fall 2022
 
 # Welcome to the Ann Arbor Activities program!
 Please download the contents of this github repository into one folder
-You must add the API key to line ____ of ann_arbor_activities.py. The API key is shown below:
+You must add the API key to line 20 of ann_arbor_activities.py. The API key is shown below:
 
 API_Key = "RnptfKoWHmedYQs00_eC02DQgRdu3n2_KzQ2dsHafeGa3EEZ7pMNrMeJBJp5LyfEKv8UzOEI74mo3MnrDgCWMTNJJBLBBIbv7SFo873QJ3OVACHTHRd3iHklwkWGY3Yx"
 
